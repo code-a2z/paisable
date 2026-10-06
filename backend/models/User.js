@@ -12,9 +12,48 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  name: {
+    type: String,
+    default: '',
+  },
+  bio: {
+    type: String,
+    default: '',
+  },
+  phone: {
+    type: String,
+    default: '',
+  },
+  occupation: {
+    type: String,
+    default: '',
+  },
+  avatar: {
+    type: String,
+    default: '',
+  },
   defaultCurrency: {
     type: String,
     default: 'USD',
+  },
+  preferences: {
+    theme: {
+      type: String,
+      enum: ['light', 'dark', 'system'],
+      default: 'light',
+    },
+    dateFormat: {
+      type: String,
+      default: 'YYYY-MM-DD',
+    },
+    budgetAlerts: {
+      type: Boolean,
+      default: true,
+    },
+    emailNotifications: {
+      type: Boolean,
+      default: true,
+    },
   },
   isSetupComplete: {
     type: Boolean,
