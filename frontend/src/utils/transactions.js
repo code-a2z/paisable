@@ -9,7 +9,8 @@ export const handleExportCSV = async () => {
     const res = await api.get('/transactions/export', {
       responseType: 'blob', // Important for file download
     });
-    const blob = new Blob([res.data], { type: 'text/csv' });
+    const blobData = res.data instanceof Blob ? res.data : new Blob([res.data], { type: 'text/csv;charset=utf-8;' });
+    const blob = new Blob([blobData], { type: 'text/csv;charset=utf-8;' });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;

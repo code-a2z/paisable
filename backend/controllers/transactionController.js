@@ -342,7 +342,8 @@ const deleteCategory = async (req, res) => {
 
 const exportTransactions = async (req, res) => {
   try {
-    const transactions = await IncomeExpense.find({ user: req.user._id, isDeleted: false }).lean();
+    const userId = req.user._id || req.user.id;
+    const transactions = await IncomeExpense.find({ user: userId, isDeleted: false }).lean();
 
     const csvData = transactions.map(({ _id, user, name, category, cost, addedOn, isIncome }) => ({
       id: _id,
@@ -354,8 +355,11 @@ const exportTransactions = async (req, res) => {
       isIncome,
     }));
 
-    // Use Papa.unparse directly
-    const csv = Papa.unparse(csvData, { header: true });
+    // Use Papa.unparse directly with explicit columns for reliability even on empty datasets
+    const csv = Papa.unparse(csvData, {
+      header: true,
+      columns: ['id', 'user', 'name', 'category', 'cost', 'addedOn', 'isIncome'],
+    });
 
     res.setHeader('Content-Type', 'text/csv');
     res.setHeader('Content-Disposition', 'attachment; filename="paisable_transactions.csv"');
