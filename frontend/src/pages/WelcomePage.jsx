@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import useAuth from '../hooks/useAuth';
 import ThemeToggle from '../components/ThemeToggle';
+import BackToTop from '../components/BackToTop';
+import FeedbackModal from '../components/FeedbackModal';
 
 const ChartIcon = () => <svg className="h-12 w-12 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>;
 
@@ -39,8 +41,8 @@ const FeatureCard = ({ icon, title, children }) => {
 };
 
 export default function WelcomePage() {
-  const { user } = useAuth();
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
+  const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
 
   return (
     <div className="bg-gray-50 dark:bg-gray-900 min-h-screen font-montserrat text-gray-800 dark:text-gray-200">
@@ -105,9 +107,25 @@ export default function WelcomePage() {
       </section>
 
       {/* Footer */}
-      <footer className="py-8 text-center text-gray-500 dark:text-gray-400">
-        <p>&copy; {new Date().getFullYear()} Paisable. All Rights Reserved.</p>
+      <footer className="py-8 bg-white dark:bg-gray-800/80 border-t border-gray-200 dark:border-gray-700 text-center text-gray-500 dark:text-gray-400">
+        <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <p>&copy; {new Date().getFullYear()} Paisable. All Rights Reserved.</p>
+          <div className="flex items-center gap-6">
+            <button
+              onClick={() => setIsFeedbackOpen(true)}
+              className="text-blue-600 dark:text-blue-400 hover:underline text-sm font-medium"
+            >
+              Share Feedback
+            </button>
+            <Link to="/contact" className="hover:underline text-sm font-medium">
+              Contact Us
+            </Link>
+          </div>
+        </div>
       </footer>
+
+      <BackToTop />
+      <FeedbackModal isOpen={isFeedbackOpen} onClose={() => setIsFeedbackOpen(false)} />
     </div>
   );
 }

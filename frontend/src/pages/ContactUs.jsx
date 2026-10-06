@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import ThemeToggle from "../components/ThemeToggle";
-import { useEffect } from "react";
+import BackToTop from "../components/BackToTop";
 
 const ContactUs = () => {
   const [formData, setFormData] = useState({
@@ -584,6 +584,7 @@ const faqs = [
       <footer className="py-8 text-center text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800">
         <p>&copy; {new Date().getFullYear()} Paisable. All Rights Reserved.</p>
       </footer>
+      <BackToTop />
     </div>
   );
 };
