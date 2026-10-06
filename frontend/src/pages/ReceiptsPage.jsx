@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import api from "../api/axios";
+import { receiptService } from "../services";
 import TransactionModal from "../components/TransactionModal";
 import { toast, Bounce } from "react-toastify";
 
@@ -20,8 +20,8 @@ const ReceiptsPage = () => {
 	useEffect(() => {
 		const fetchCategories = async () => {
 			try {
-				const response = await api.get("/transactions/categories");
-				setCategories(response.data);
+				const data = await receiptService.getCategories();
+				setCategories(data || []);
 			} catch (error) {
 				console.error("Failed to fetch categories:", error);
 			}
@@ -58,12 +58,8 @@ const ReceiptsPage = () => {
 		try {
 			setUploading(true);
 			setError("");
-			const response = await api.post("/receipts/upload", formData, {
-				headers: {
-					"Content-Type": "multipart/form-data",
-				},
-			});
-			setReceiptResult(response.data);
+			const data = await receiptService.uploadReceipt(formData);
+			setReceiptResult(data);
 
 			// Open the modal to allow user to edit the extracted data
 			setOpenEditReceiptResult(true);
@@ -105,7 +101,7 @@ const ReceiptsPage = () => {
 				isIncome: receiptResult.extractedData.isIncome || false,
 			};
 
-			await api.post("/receipts/save-transaction", {
+			await receiptService.saveReceiptTransaction({
 				receiptId: receiptResult._id,
 				transactionData: transactionData,
 			});

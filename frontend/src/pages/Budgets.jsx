@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import api from '../api/axios';
 import Spinner from '../components/Spinner';
 import useCurrency from '../hooks/useCurrency';
 import BudgetModal from '../components/BudgetModal';
 import EmptyState from '../components/EmptyState';
+import { budgetService, transactionService } from '../services';
 
 const Budgets = () => {
   const [budgets, setBudgets] = useState([]);
@@ -17,14 +17,14 @@ const Budgets = () => {
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      const [budgetsRes, categoriesRes, transactionsRes] = await Promise.all([
-        api.get('/budgets'),
-        api.get('/transactions/categories/expense'),
-        api.get('/transactions'),
+      const [budgetsData, categoriesData, transactionsData] = await Promise.all([
+        budgetService.getBudgets(),
+        transactionService.getExpenseCategories(),
+        transactionService.getTransactions(),
       ]);
-      setBudgets(budgetsRes.data);
-      setCategories(categoriesRes.data);
-      setTransactions(transactionsRes.data.transactions || []);
+      setBudgets(budgetsData || []);
+      setCategories(categoriesData || []);
+      setTransactions(transactionsData?.transactions || []);
     } catch (error) {
       console.error('Failed to fetch budgets or transactions', error);
     } finally {
@@ -48,8 +48,8 @@ const Budgets = () => {
 
   const handleFormSubmit = async (formData, id) => {
     try {
-      if (id) await api.put(`/budgets/${id}`, formData);
-      else await api.post('/budgets', formData);
+      if (id) await budgetService.updateBudget(id, formData);
+      else await budgetService.addBudget(formData);
       fetchData();
       handleCloseBudgetModal();
     } catch (error) {
@@ -60,7 +60,7 @@ const Budgets = () => {
   const handleDeleteBudget = async (id) => {
     if (window.confirm('Are you sure you want to delete this budget?')) {
       try {
-        await api.delete(`/budgets/${id}`);
+        await budgetService.deleteBudget(id);
         fetchData();
       } catch (error) {
         console.error('Failed to delete budget', error);
@@ -84,7 +84,7 @@ const Budgets = () => {
   return (
     <>
       <div className="flex flex-wrap gap-4 justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">Budgets</h1>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Budgets</h1>
         <div className="flex gap-4">
           <button
             onClick={() => handleOpenBudgetModal()}
@@ -98,34 +98,34 @@ const Budgets = () => {
       {loading ? (
         <Spinner />
       ) : budgets.length > 0 ? (
-        <div className="bg-white shadow rounded-lg overflow-x-auto hover:shadow-lg transition-all duration-300">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+        <div className="bg-white dark:bg-gray-800 shadow rounded-lg overflow-x-auto hover:shadow-lg transition-all duration-300">
+          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+            <thead className="bg-gray-50 dark:bg-gray-700">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                   Category
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                   Month
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                   Budget
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                   Spent
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                   Remaining
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                   Progress
                 </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
               {budgets.map((b) => {
                 const spent = calculateSpent(b);
                 const remaining = b.amount - spent;
@@ -135,11 +135,11 @@ const Budgets = () => {
 
                 return (
                   <tr key={b._id}>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-6 py-4 whitespace-nowrap text-gray-900 dark:text-gray-100">
                       {b.category}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap font-semibold">{`${b.month}/${b.year}`}</td>
-                    <td className="px-6 py-4 whitespace-nowrap font-semibold">
+                    <td className="px-6 py-4 whitespace-nowrap font-semibold text-gray-900 dark:text-gray-100">{`${b.month}/${b.year}`}</td>
+                    <td className="px-6 py-4 whitespace-nowrap font-semibold text-gray-900 dark:text-gray-100">
                       {new Intl.NumberFormat('en-US', {
                         style: 'currency',
                         currency: currency.code,
@@ -162,7 +162,7 @@ const Budgets = () => {
                       }).format(remaining)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap w-1/3">
-                      <div className="w-full bg-gray-200 rounded-full h-3">
+                      <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
                         <div
                           className={`h-3 rounded-full ${
                             percent < 80
@@ -174,7 +174,7 @@ const Budgets = () => {
                           style={{ width: `${percent}%` }}
                         ></div>
                       </div>
-                      <span className="text-xs text-gray-500">{percent}%</span>
+                      <span className="text-xs text-gray-500 dark:text-gray-400">{percent}%</span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <button
@@ -199,7 +199,7 @@ const Budgets = () => {
           />
         </div>
       ) : (
-        <div className="p-6 bg-white shadow rounded-lg">
+        <div className="p-6 bg-white dark:bg-gray-800 shadow rounded-lg">
           <EmptyState message="No budgets found" />
         </div>
       )}

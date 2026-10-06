@@ -4,7 +4,8 @@ import useAuth from '../hooks/useAuth';
 
 const CurrencySelector = () => {
   const { currency, changeCurrency, supportedCurrencies } = useCurrency();
-  const { user } = useAuth();
+  const auth = useAuth();
+  const user = auth?.user;
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {

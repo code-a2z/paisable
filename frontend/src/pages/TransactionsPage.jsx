@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Edit, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
-import api from '../api/axios';
+import { transactionService } from '../services';
 import TransactionModal from '../components/TransactionModal';
-import TransactionDetailModal from '../components/TransactionDetailModal'
+import TransactionDetailModal from '../components/TransactionDetailModal';
 import ManageCategoriesModal from '../components/ManageCategoriesModal';
 import Spinner from '../components/Spinner';
 import useCurrency from '../hooks/useCurrency';
@@ -53,37 +53,37 @@ const TransactionsPage = () => {
 
     try {
       const [summaryRes, expenseCategoriesRes, incomeCategoriesRes] = await Promise.all([
-        api.get('/transactions/summary'),
-        api.get('/transactions/categories/expense'),
-        api.get('/transactions/categories/income')
+        transactionService.getSummary(),
+        transactionService.getExpenseCategories(),
+        transactionService.getIncomeCategories()
       ]);
-      setSummaryData(summaryRes.data);
-      setExpenseCategories(expenseCategoriesRes.data);
-      setIncomeCategories(incomeCategoriesRes.data);
-      const params = new URLSearchParams({
+      setSummaryData(summaryRes);
+      setExpenseCategories(expenseCategoriesRes || []);
+      setIncomeCategories(incomeCategoriesRes || []);
+      const params = {
         page: page.toString(),
         limit: '10'
-      });
+      };
 
       if (currentSearchTerm) {
-        params.append('search', currentSearchTerm);
+        params.search = currentSearchTerm;
       }
       if (typeFilter !== 'all') {
-        params.append('isIncome', typeFilter === 'income' ? 'true' : 'false');
+        params.isIncome = typeFilter === 'income' ? 'true' : 'false';
       }
       if (categoryFilter !== 'all') {
-        params.append('category', categoryFilter);
+        params.category = categoryFilter;
       }
       if (dateFrom) {
-        params.append('startDate', dateFrom);
+        params.startDate = dateFrom;
       }
       if (dateTo) {
-        params.append('endDate', dateTo);
+        params.endDate = dateTo;
       }
 
-      const transactionsRes = await api.get(`/transactions?${params.toString()}`);
-      setTransactions(transactionsRes.data.transactions);
-      setTotalPages(transactionsRes.data.totalPages);
+      const transactionsRes = await transactionService.getTransactions(params);
+      setTransactions(transactionsRes?.transactions || []);
+      setTotalPages(transactionsRes?.totalPages || 1);
       setSelectedTransactionIds([]); // Clear selection on data change
 
     } catch (error) {
@@ -163,8 +163,8 @@ const TransactionsPage = () => {
 
   const handleFormSubmit = async (formData, id) => {
     try {
-      if (id) await api.put(`/transactions/${id}`, formData);
-      else await api.post('/transactions', formData);
+      if (id) await transactionService.updateTransaction(id, formData);
+      else await transactionService.addTransaction(formData);
       fetchData();
       handleCloseTransactionModal();
     } catch (error) {
@@ -175,7 +175,7 @@ const TransactionsPage = () => {
   const handleDeleteTransaction = async (id) => {
     if (window.confirm("Are you sure you want to delete this transaction?")) {
       try {
-        await api.delete(`/transactions/${id}`);
+        await transactionService.deleteTransaction(id);
         // Compute the new transactions array after deletion
         setTransactions(prev => {
           const updatedTransactions = prev.filter(t => t._id !== id);
@@ -204,9 +204,7 @@ const TransactionsPage = () => {
     const confirmMessage = `Are you sure you want to permanently delete these ${selectedTransactionIds.length} transactions? This action cannot be undone.`;
     if (window.confirm(confirmMessage)) {
       try {
-        await api.delete('/transactions/bulk', { 
-          data: { transactionIds: selectedTransactionIds } 
-        });
+        await transactionService.bulkDeleteTransactions(selectedTransactionIds);
         setSelectedTransactionIds([]);
         fetchData(); // Refetch data
       } catch (error) {
@@ -227,7 +225,7 @@ const TransactionsPage = () => {
   const handleDeleteCategory = async (categoryToDelete) => {
     if (window.confirm(`Are you sure you want to delete the category "${categoryToDelete}"? All associated transactions will be moved to "Miscellaneous".`)) {
       try {
-        await api.delete('/transactions/category', { data: { categoryToDelete } });
+        await transactionService.deleteCategory(categoryToDelete);
         fetchData();
       } catch (error) {
         console.error("Failed to delete category", error);

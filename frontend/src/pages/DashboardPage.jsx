@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import api from '../api/axios';
+import { transactionService } from '../services';
 import CategoryPieChart from '../components/CategoryPieChart';
 import ActivityBarChart from '../components/ActivityBarChart';
 import LineChart from '../components/LineChart';
@@ -51,19 +51,17 @@ const DashboardPage = () => {
   const fetchData = useCallback(async () => {
     try {
       setLoading(true);
-      const [summaryRes, chartRes, expenseCategoriesRes, // New API call
-        incomeCategoriesRes] = await Promise.all([
-          api.get('/transactions/summary'),
-          api.get('/transactions/charts'),
-          api.get('/transactions/categories/expense'),
-          api.get('/transactions/categories/income')
-        ]);
-      console.log(chartRes)
-      setSummaryData(summaryRes.data);
-      setChartData(chartRes.data);
-      setExpenseCategories(expenseCategoriesRes.data);
-      setIncomeCategories(incomeCategoriesRes.data);
-      setRecentTransactions(summaryRes.data.recentTransactions || []);
+      const [summaryRes, chartRes, expenseCategoriesRes, incomeCategoriesRes] = await Promise.all([
+        transactionService.getSummary(),
+        transactionService.getCharts(),
+        transactionService.getExpenseCategories(),
+        transactionService.getIncomeCategories(),
+      ]);
+      setSummaryData(summaryRes);
+      setChartData(chartRes);
+      setExpenseCategories(expenseCategoriesRes || []);
+      setIncomeCategories(incomeCategoriesRes || []);
+      setRecentTransactions(summaryRes?.recentTransactions || []);
     } catch (error) {
       console.error("Failed to fetch dashboard data", error);
     } finally {
@@ -93,7 +91,7 @@ const DashboardPage = () => {
     }
 
     try {
-      await api.post("/transactions", formData);
+      await transactionService.addTransaction(formData);
       fetchData();
       handleCloseModal();
     } catch (error) {

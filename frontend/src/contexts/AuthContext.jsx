@@ -2,6 +2,7 @@ import React, { createContext, useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/axios';
+import { authService } from '../services/authService';
 
 const AuthContext = createContext();
 
@@ -19,9 +20,9 @@ export const AuthProvider = ({ children }) => {
         setToken(storedToken);
         api.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
         try {
-          // Check if the token is valid by fetching user data
-          const response = await api.get('/auth/me');
-          setUser(response.data);
+          // Check if the token is valid by fetching user data via authService
+          const data = await authService.getMe();
+          setUser(data);
         } catch (error) {
           // Clear invalid token
           console.error("Token verification failed", error);
@@ -45,8 +46,8 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      const response = await api.post('/auth/login', { email, password });
-      const { token: newToken, ...userData } = response.data;
+      const data = await authService.login(email, password);
+      const { token: newToken, ...userData } = data;
 
       setToken(newToken);
       setUser(userData);
@@ -61,15 +62,16 @@ export const AuthProvider = ({ children }) => {
       }
     } catch (error) {
       console.error('Login failed', error.response?.data);
-      setPendingToast({ type: 'error', message: error.response?.data?.message || 'Login failed. Please try again.' });
-      throw new Error(error.response?.data?.message || 'Login failed. Please try again.');
+      const msg = error.response?.data?.message || 'Login failed. Please try again.';
+      setPendingToast({ type: 'error', message: msg });
+      throw new Error(msg);
     }
   };
 
   const signup = async (email, password) => {
     try {
-      const response = await api.post('/auth/signup', { email, password });
-      const { token: newToken, ...userData } = response.data;
+      const data = await authService.signup(email, password);
+      const { token: newToken, ...userData } = data;
 
       setToken(newToken);
       setUser(userData);
@@ -80,8 +82,9 @@ export const AuthProvider = ({ children }) => {
       navigate('/setup');
     } catch (error) {
       console.error('Signup failed', error.response?.data);
-      setPendingToast({ type: 'error', message: error.response?.data?.message || 'Signup failed. Please try again.' });
-      throw new Error(error.response?.data?.message || 'Signup failed. Please try again.');
+      const msg = error.response?.data?.message || 'Signup failed. Please try again.';
+      setPendingToast({ type: 'error', message: msg });
+      throw new Error(msg);
     }
   };
 
@@ -96,10 +99,8 @@ export const AuthProvider = ({ children }) => {
 
   const setup = async (defaultCurrency) => {
     try {
-      const response = await api.put('/auth/setup', { defaultCurrency });
-
-      setUser(response.data);
-
+      const data = await authService.completeSetup({ defaultCurrency });
+      setUser(data);
       navigate('/dashboard');
     } catch (error) {
       console.error('Setup failed', error);
@@ -107,8 +108,12 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const updateUser = (updatedData) => {
+    setUser((prev) => ({ ...prev, ...updatedData }));
+  };
+
   return (
-    <AuthContext.Provider value={{ user, token, loading, login, signup, logout, setup }}>
+    <AuthContext.Provider value={{ user, token, loading, login, signup, logout, setup, updateUser, setUser }}>
       {children}
     </AuthContext.Provider>
   );
