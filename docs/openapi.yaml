@@ -47,6 +47,8 @@ tags:
     description: Operations related to income and expenses
   - name: Receipts
     description: Receipt uploading and OCR processing
+  - name: Feedback
+    description: User feedback, issue reports, and feature suggestions
 
 paths:
   # --- Auth Routes ---
@@ -263,4 +265,61 @@ paths:
         "401":
           description: Unauthorized
         "500":
-          description: Server error 
+          description: Server error
+
+  # --- Feedback Routes ---
+  /feedback:
+    post:
+      summary: Submit user feedback, report an issue, or suggest an improvement
+      tags: [Feedback]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [category, title, message]
+              properties:
+                category:
+                  type: string
+                  enum: [thoughts, issue, improvement]
+                  example: thoughts
+                title:
+                  type: string
+                  example: Loving the receipt OCR feature!
+                message:
+                  type: string
+                  example: The scanning is so quick and accurate.
+                rating:
+                  type: integer
+                  minimum: 1
+                  maximum: 5
+                  example: 5
+                name:
+                  type: string
+                  example: Alex
+                email:
+                  type: string
+                  example: alex@example.com
+      responses:
+        "201":
+          description: Feedback submitted successfully
+        "400":
+          description: Validation error
+    get:
+      summary: Get all feedback
+      tags: [Feedback]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: List of all feedback
+  /feedback/my:
+    get:
+      summary: Get feedback submitted by the authenticated user
+      tags: [Feedback]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: List of current user's feedback submissions 

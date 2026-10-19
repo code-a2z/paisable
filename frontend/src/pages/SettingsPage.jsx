@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import useAuth from '../hooks/useAuth';
 import api from '../api/axios';
 
@@ -28,12 +29,25 @@ const SettingsPage = () => {
   };
 
   return (
-    <div className="max-w-3xl mx-auto p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md">
+    <div className="max-w-3xl mx-auto p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md space-y-6">
       <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">Settings</h1>
       
       <div className="mb-6">
         <h2 className="text-lg font-semibold text-gray-700 dark:text-gray-300">Account Info</h2>
         <p className="mt-2 text-gray-800 dark:text-gray-200"><strong>Email:</strong> {user?.email}</p>
+      </div>
+
+      <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
+        <h2 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">Feedback & Suggestions</h2>
+        <p className="text-gray-600 dark:text-gray-400 mb-4 text-sm">
+          Have an idea to improve Paisable, found an issue, or want to share your thoughts? We would love to hear from you.
+        </p>
+        <Link
+          to="/feedback"
+          className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm font-medium transition-colors"
+        >
+          Share Feedback
+        </Link>
       </div>
 
       <div className="mt-8 border-t border-gray-200 dark:border-gray-700 pt-6">
