@@ -12,10 +12,12 @@ import SettingsPage from './pages/SettingsPage';
 import NotFound from './pages/NotFound';
 import Budgets from './pages/Budgets';
 import ContactUs from './pages/ContactUs';
+import FeedbackPage from './pages/FeedbackPage';
 import Layout from './components/Layout';
 import ProtectedRoute from './components/ProtectedRoute';
 import SetupProtectedRoute from './components/SetupProtectedRoute';
 import RecurringTransactions from './pages/RecurringTransactions';
+import BackToTop from './components/BackToTop';
 
 function App() {
   return (
@@ -52,9 +54,11 @@ function App() {
             path="/recurring-transactions"
             element={<RecurringTransactions />}
           />
+          <Route path="/feedback" element={<FeedbackPage />} />
         </Route>
         <Route path="*" element={<NotFound />} />
       </Routes>
+      <BackToTop />
       <ToastContainer />
     </>
   );

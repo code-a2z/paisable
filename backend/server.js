@@ -47,6 +47,7 @@ app.use('/api/receipts', require('./routes/receiptRoutes'));
 app.use('/api/users', require('./routes/userRoutes'));
 app.use('/api/budgets', require('./routes/budgetRoutes'));
 app.use('/api/recurring', require('./routes/recurringTransactionRoutes'));
+app.use('/api/feedback', require('./routes/feedbackRoutes'));
 
 // Serve static files from the uploads directory
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));

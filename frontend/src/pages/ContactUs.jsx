@@ -197,6 +197,13 @@ const faqs = [
           </Link>
 
           <Link
+            to="/feedback"
+            className="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-semibold"
+          >
+            Feedback
+          </Link>
+
+          <Link
             to="/login"
             className="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-semibold"
           >

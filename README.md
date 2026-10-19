@@ -10,6 +10,8 @@ Paisable is a **full-stack personal finance management app** built with **React 
 * **Receipt Management** – Upload receipts and automatically extract expense details using **Google Gemini OCR**
 * **Full-Stack Deployment Ready** – Backend on **Render**, frontend on **Netlify**
 * **Account Settings** – View your profile and delete your account permanently from the app.
+* **Feedback & Suggestions** – Share thoughts, report issues, or suggest improvements with interactive ratings and history tracking.
+* **Floating Back to Top** – Smoothly scroll back to the top of any page with a floating action button.
 
 ## Deployment Links
 
@@ -186,6 +188,12 @@ You can:
 ### Users
 
 * `DELETE /api/users/account` → Delete the authenticated user account permanently
+
+### Feedback
+
+* `POST /api/feedback` → Submit feedback, bug report, or improvement suggestion
+* `GET /api/feedback/my` → Get current user's submitted feedback
+* `GET /api/feedback` → Get all feedback submissions
 
 ## Deployment
 

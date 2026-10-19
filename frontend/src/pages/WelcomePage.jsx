@@ -105,7 +105,15 @@ export default function WelcomePage() {
       </section>
 
       {/* Footer */}
-      <footer className="py-8 text-center text-gray-500 dark:text-gray-400">
+      <footer className="py-8 text-center text-gray-500 dark:text-gray-400 space-y-2">
+        <div className="flex justify-center items-center gap-6 text-sm font-medium">
+          <Link to="/contact" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+            Contact Us
+          </Link>
+          <Link to="/feedback" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+            Feedback
+          </Link>
+        </div>
         <p>&copy; {new Date().getFullYear()} Paisable. All Rights Reserved.</p>
       </footer>
     </div>
